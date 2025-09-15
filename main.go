@@ -8,8 +8,13 @@ import (
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	requestPath := r.URL.Path // Get the path from the request URL
-	fmt.Printf("Received request for path: %s\n", requestPath)
-	io.WriteString(w, fmt.Sprintf("You requested the path: %s\n", requestPath))
+	if requestPath != "/todo" {
+		fmt.Printf("Received request for path: %s\n", requestPath)
+		io.WriteString(w, fmt.Sprintf("You requested the path: %s\n", requestPath))
+		return
+	}
+	// obj := Todo{ID: 1, Title: "Sample Todo", Completed: false}
+	// io.WriteString(w, obj)
 }
 
 func main() {
