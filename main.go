@@ -19,7 +19,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, fmt.Sprintf("You requested the path: %s\n", requestPath))
 		return
 	}
-	// TODO: @ariel
+	// TODO: @ariel check this out
 	// obj := Todo{ID: 1, Title: "Sample Todo", Completed: false}
 	// io.WriteString(w, obj)
 }
