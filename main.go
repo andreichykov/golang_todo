@@ -4,24 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"glitch/todo_api/dto"
+	"io"
 	"net/http"
+	"strconv"
+	"strings"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
-func GetHandler(w http.ResponseWriter, r *http.Request) {
-	// requestPath := r.URL.Path // Get the path from the request URL
+func Handler(w http.ResponseWriter, r *http.Request) {
+	requestPath := r.URL.Path // Get the path from the request URL
 
-	// NOT GET
-	// if requestPath != "/todo" {
-	// 	fmt.Printf("Received request for path: %s\n", requestPath)
-	// 	io.WriteString(w, fmt.Sprintf("You requested the path: %s\n", requestPath))
-	// 	return
-	// }
-
-	// NOT GET
-
-	// obj := dto.Todo{ID: 1, Title: "Learn Go", Completed: true}
+	// Print the request path
+	if requestPath != "/todo" {
+		fmt.Printf("Received request for path: %s\n", requestPath)
+		io.WriteString(w, fmt.Sprintf("You requested the path: %s\n", requestPath))
+		return
+	}
 
 	bytes, _ := json.Marshal(dto.Todos)
 	w.Write(bytes)
@@ -29,12 +28,12 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	var newTodo dto.TodoPost
 	err := json.NewDecoder(r.Body).Decode(&newTodo)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
@@ -47,12 +46,52 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newTodo)
+
+}
+
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+	TodoList := dto.GetTodos()
+	if r.Method == http.MethodGet {
+
+		bytes, _ := json.Marshal(TodoList)
+		w.Write(bytes) // get method all todos
+	}
+
+}
+
+func GetByIdHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/GetTodo/"))
+	if err != nil {
+		http.Error(w, "Invalid Todo ID", http.StatusBadRequest)
+		return
+	}
+
+	for _, todo := range dto.Todos {
+		if todo.ID == id {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(todo)
+			return
+		}
+	}
+	http.Error(w, "Todo not found", http.StatusNotFound) // get todo by id
+}
+
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodDelete {
+		dto.Todos = nil
+
+		fmt.Println("All todos deleted")
+	}
 }
 
 func main() {
-	// db.TestDatabase()
+	// db.TestDatabase() // doesn't need yet`
+	http.HandleFunc("/DeleteTodo", DeleteHandler)
+	http.HandleFunc("/GetTodo/", GetByIdHandler)
+	http.HandleFunc("/GetTodo", GetHandler)
 	http.HandleFunc("/todo", PostHandler)
-	http.HandleFunc("/", GetHandler) // Register the handler for all paths
+	http.HandleFunc("/", Handler) // Register the handler for all paths
 	fmt.Println("Server starting on port 8080...")
 	http.ListenAndServe(":8080", nil) // Start the server
 }

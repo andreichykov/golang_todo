@@ -12,3 +12,7 @@ type TodoPost struct {
 
 var Todos []TodoPost
 var IDTodo = 1
+
+func GetTodos() []TodoPost {
+	return Todos
+}
