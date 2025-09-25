@@ -85,8 +85,35 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DeleteByIdHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/DeleteTodo/"))
+	if err != nil {
+		http.Error(w, "Invalid Todo ID", http.StatusBadRequest)
+		return
+	}
+
+	for i, todo := range dto.Todos {
+		if todo.ID == id {
+			dto.Todos = append(dto.Todos[:i], dto.Todos[i+1:]...)
+			fmt.Printf("Todo with ID %d deleted\n", id)
+			return
+		}
+	}
+	http.Error(w, "Todo not found", http.StatusNotFound) // delete todo by id
+}
+
+// func PutHandler(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method == http.MethodPut {
+
+// 	}
+
+// doesn`t need yet cuz of existing input`
+
+// }
+
 func main() {
 	// db.TestDatabase() // doesn't need yet`
+	http.HandleFunc("/DeleteTodo/", DeleteByIdHandler)
 	http.HandleFunc("/DeleteTodo", DeleteHandler)
 	http.HandleFunc("/GetTodo/", GetByIdHandler)
 	http.HandleFunc("/GetTodo", GetHandler)
