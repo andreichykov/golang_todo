@@ -103,11 +103,21 @@ func DeleteByIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // func PutHandler(w http.ResponseWriter, r *http.Request) {
-// 	if r.Method == http.MethodPut {
-
+// 	if r.Method != http.MethodPut {
+// 		http.Error(w, "Only PUT allowed", http.StatusMethodNotAllowed)
+// 		return
 // 	}
 
-// doesn`t need yet cuz of existing input`
+// 	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/put/"))
+// 		if err != nil {
+// 		http.Error(w, "Invalid Todo ID", http.StatusBadRequest)
+// 		return
+// 	}
+// 	if id == '/' {
+// 		http.Error(w, "Invalid Todo ID", http.StatusBadRequest)
+// 		return
+
+// 	}
 
 // }
 
